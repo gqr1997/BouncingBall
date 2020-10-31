@@ -87,15 +87,11 @@ public class BouncingWindow extends JPanel {
 		
 	private void runSingleBall(int index) {
 		Ball currentBall = balls.get(index);
-		// Start the ball bouncing (in its own thread)
 		Thread gameThread = new Thread() {
 			public void run() {
-				while (true) { // Execute one update step
-					// Calculate the ball's new position
+				while (true) {
 					currentBall.setBallX(currentBall.getBallX()+currentBall.getBallSpeedX());
 					currentBall.setBallY(currentBall.getBallY()+currentBall.getBallSpeedY());
-					// Check if the ball moves over the bounds
-					// If so, adjust the position and speed.
 					if (currentBall.getBallX() - currentBall.getBallRadius() < 0) {
 						currentBall.setBallSpeedX(-currentBall.getBallSpeedX());
 						currentBall.setBallX(currentBall.getBallRadius());
@@ -103,7 +99,6 @@ public class BouncingWindow extends JPanel {
 						currentBall.setBallSpeedX(-currentBall.getBallSpeedX());
 						currentBall.setBallX(BOX_WIDTH - currentBall.getBallRadius());
 					}
-					// May cross both x and y bounds
 					if (currentBall.getBallY() - currentBall.getBallRadius() < 0) {
 						currentBall.setBallSpeedY(-currentBall.getBallSpeedY());
 						currentBall.setBallY(currentBall.getBallRadius());
@@ -111,16 +106,16 @@ public class BouncingWindow extends JPanel {
 						currentBall.setBallSpeedY(-currentBall.getBallSpeedY());
 						currentBall.setBallY(BOX_HEIGHT - currentBall.getBallRadius());
 					}
-					// Refresh the display
-					repaint(); // Callback paintComponent()
-					// Delay for timing control and give other threads a chance
-					try {
-						Thread.sleep(1000 / UPDATE_RATE);  // milliseconds
-					} catch (InterruptedException ex) { }
+					synchronized (this) {
+						repaint();
+						try {
+							Thread.sleep(1000 / UPDATE_RATE);
+						} catch (InterruptedException ex) { }
+					}
 				}
 			}
 		};
-		gameThread.start();  // Callback run()
+		gameThread.start();
 	}
 		  
 	/** Custom rendering codes for drawing the JPanel */
